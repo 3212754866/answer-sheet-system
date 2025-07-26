@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>智能答题卡系统</title>
+    <title>智能答题卡系统 - 增强版</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
@@ -33,6 +33,7 @@
             background: rgba(255, 255, 255, 0.9);
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: fadeInDown 0.8s ease;
         }
         
         h1 {
@@ -55,6 +56,7 @@
             padding: 30px;
             margin-bottom: 30px;
             transition: transform 0.3s ease;
+            animation: fadeInUp 0.6s ease;
         }
         
         .card:hover {
@@ -153,6 +155,16 @@
             box-shadow: 0 6px 20px rgba(178, 31, 31, 0.4);
         }
         
+        .btn-warning {
+            background: #ff9800;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
+        }
+        
+        .btn-warning:hover {
+            background: #e68a00;
+            box-shadow: 0 6px 20px rgba(255, 152, 0, 0.4);
+        }
+        
         .form-group {
             margin-bottom: 25px;
         }
@@ -193,6 +205,7 @@
             padding: 20px;
             border-left: 5px solid #1a2a6c;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
         }
         
         .question-header {
@@ -208,6 +221,16 @@
             font-size: 1.3rem;
             font-weight: 600;
             color: #1a2a6c;
+        }
+        
+        .incomplete-badge {
+            background: #ff9800;
+            color: white;
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: none;
         }
         
         .options {
@@ -382,11 +405,124 @@
             background: #f44336;
         }
         
+        .notification.warning {
+            background: #ff9800;
+        }
+        
         .answer-upload {
             margin: 30px 0;
             padding: 20px;
             background: #f8f9ff;
             border-radius: 12px;
+        }
+        
+        .confirmation-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .confirmation-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            transform: translateY(-20px);
+            transition: transform 0.3s ease;
+        }
+        
+        .confirmation-modal.active .modal-content {
+            transform: translateY(0);
+        }
+        
+        .modal-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header i {
+            font-size: 2.5rem;
+            color: #ff9800;
+            margin-right: 15px;
+        }
+        
+        .modal-header h3 {
+            font-size: 1.8rem;
+            color: #333;
+        }
+        
+        .modal-body {
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+        
+        .modal-body p {
+            margin-bottom: 15px;
+        }
+        
+        .highlight {
+            background: #fff8e1;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #ff9800;
+            text-align: center;
+            font-size: 1.3rem;
+            margin: 15px 0;
+        }
+        
+        .modal-actions {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .progress-container {
+            margin: 20px 0;
+            background: #f0f4ff;
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .progress-bar {
+            height: 20px;
+            background: #e0e5ff;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            border-radius: 10px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #555;
         }
         
         @media (max-width: 768px) {
@@ -408,14 +544,52 @@
                 width: 100%;
                 text-align: center;
             }
+            
+            .modal-actions {
+                flex-direction: column;
+            }
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 15px rgba(255, 152, 0, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 152, 0, 0);
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1><i class="fas fa-graduation-cap"></i> 智能答题卡系统</h1>
-            <p class="subtitle">学生答题与教师评分一体化解决方案</p>
+            <h1><i class="fas fa-graduation-cap"></i> 智能答题卡系统 - 增强版</h1>
+            <p class="subtitle">新增提交前确认功能，防止意外提交</p>
         </header>
         
         <main>
@@ -427,7 +601,8 @@
                 </div>
                 
                 <p style="text-align: center; font-size: 1.2rem; margin-bottom: 30px; line-height: 1.7;">
-                    请选择您的身份进入系统。学生端用于答题，教师端用于管理考试和查看成绩。
+                    请选择您的身份进入系统。学生端用于答题，教师端用于管理考试和查看成绩。<br>
+                    <span style="color: #ff9800; font-weight: 600;">新功能：提交前确认未完成题目</span>
                 </p>
                 
                 <div class="role-selector">
@@ -486,13 +661,25 @@
                     说明：请根据题目要求，判断每个选项是否正确。正确选择"T"，错误选择"F"。
                 </p>
                 
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress" id="progress-bar" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-text">
+                        <span>已完成: <span id="completed-count">0</span>/72题</span>
+                        <span>未完成: <span id="incomplete-count">72</span>题</span>
+                    </div>
+                </div>
+                
                 <div class="question-container" id="questions-container">
                     <!-- 问题将通过JavaScript动态生成 -->
                 </div>
                 
                 <div class="actions">
                     <button class="btn" onclick="showSection('student-info')"><i class="fas fa-arrow-left"></i> 返回修改信息</button>
-                    <button class="btn" onclick="submitExam()"><i class="fas fa-paper-plane"></i> 提交答题卡</button>
+                    <button class="btn btn-warning" onclick="confirmSubmission()" style="animation: pulse 2s infinite;">
+                        <i class="fas fa-paper-plane"></i> 提交答题卡
+                    </button>
                 </div>
             </section>
             
@@ -591,6 +778,35 @@
         </footer>
     </div>
     
+    <!-- 提交确认弹窗 -->
+    <div class="confirmation-modal" id="confirmation-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>确认提交答题卡</h3>
+            </div>
+            <div class="modal-body">
+                <p>您还有 <span id="unanswered-count" style="font-weight:700; color:#ff9800;">0</span> 道题目未完成！</p>
+                <p>未完成的题目将按0分计算，是否确定提交？</p>
+                
+                <div class="highlight">
+                    注意：提交后将无法修改答案！
+                </div>
+                
+                <p>建议：</p>
+                <ul>
+                    <li>检查所有标有"未完成"标记的题目</li>
+                    <li>按"取消"返回继续答题</li>
+                    <li>仅当确定完成时提交</li>
+                </ul>
+            </div>
+            <div class="modal-actions">
+                <button class="btn" onclick="closeConfirmation()"><i class="fas fa-times"></i> 取消</button>
+                <button class="btn btn-warning" onclick="proceedSubmission()"><i class="fas fa-check"></i> 确定提交</button>
+            </div>
+        </div>
+    </div>
+    
     <div class="notification" id="notification"></div>
 
     <script>
@@ -657,6 +873,7 @@
             setTimeout(() => {
                 showSection('exam');
                 generateQuestions();
+                updateProgress(); // 初始化进度
             }, 1000);
         }
         
@@ -671,6 +888,7 @@
                 questionCard.innerHTML = `
                     <div class="question-header">
                         <div class="question-title">第 ${i} 题</div>
+                        <div class="incomplete-badge" id="incomplete-${i}">未完成</div>
                     </div>
                     <div class="options">
                         <div class="option">
@@ -724,6 +942,9 @@
             
             // 保存答案到sessionStorage
             saveAnswer(question, option, value);
+            
+            // 更新进度
+            updateProgress();
         }
         
         // 保存答案
@@ -734,23 +955,58 @@
             sessionStorage.setItem('answers', JSON.stringify(answers));
         }
         
-        // 提交考试
-        function submitExam() {
+        // 更新进度
+        function updateProgress() {
             const answers = JSON.parse(sessionStorage.getItem('answers') || '{}');
             const totalQuestions = 72;
+            let completedCount = 0;
             
-            // 检查是否所有题目都已作答
-            let answeredCount = 0;
             for (let i = 1; i <= totalQuestions; i++) {
-                if (answers[i] && Object.keys(answers[i]).length === 4) {
-                    answeredCount++;
+                const badge = document.getElementById(`incomplete-${i}`);
+                if (badge) {
+                    if (answers[i] && Object.keys(answers[i]).length === 4) {
+                        badge.style.display = 'none';
+                        completedCount++;
+                    } else {
+                        badge.style.display = 'block';
+                    }
                 }
             }
             
-            if (answeredCount < totalQuestions) {
-                showNotification(`您还有${totalQuestions - answeredCount}题未完成，请检查！`, "error");
-                return;
+            const progress = Math.round((completedCount / totalQuestions) * 100);
+            document.getElementById('progress-bar').style.width = `${progress}%`;
+            document.getElementById('completed-count').textContent = completedCount;
+            document.getElementById('incomplete-count').textContent = totalQuestions - completedCount;
+            
+            return totalQuestions - completedCount;
+        }
+        
+        // 确认提交
+        function confirmSubmission() {
+            const unansweredCount = updateProgress();
+            
+            if (unansweredCount > 0) {
+                document.getElementById('unanswered-count').textContent = unansweredCount;
+                document.getElementById('confirmation-modal').classList.add('active');
+            } else {
+                submitExam();
             }
+        }
+        
+        // 关闭确认弹窗
+        function closeConfirmation() {
+            document.getElementById('confirmation-modal').classList.remove('active');
+        }
+        
+        // 继续提交
+        function proceedSubmission() {
+            closeConfirmation();
+            submitExam();
+        }
+        
+        // 提交考试
+        function submitExam() {
+            const answers = JSON.parse(sessionStorage.getItem('answers') || '{}');
             
             // 保存考试结果
             saveExamResults(answers);
@@ -862,11 +1118,13 @@
                 document.getElementById('lowest-score').textContent = lowest.toFixed(1);
                 
                 // 更新部分分数（使用第一个学生的部分分数作为示例）
-                const firstStudentScore = calculateScore(allResults[0].answers);
-                document.getElementById('section1-score').textContent = firstStudentScore.sectionScores[0];
-                document.getElementById('section2-score').textContent = firstStudentScore.sectionScores[1];
-                document.getElementById('section3-score').textContent = firstStudentScore.sectionScores[2];
-                document.getElementById('section4-score').textContent = firstStudentScore.sectionScores[3];
+                if (allResults.length > 0) {
+                    const firstStudentScore = calculateScore(allResults[0].answers);
+                    document.getElementById('section1-score').textContent = firstStudentScore.sectionScores[0];
+                    document.getElementById('section2-score').textContent = firstStudentScore.sectionScores[1];
+                    document.getElementById('section3-score').textContent = firstStudentScore.sectionScores[2];
+                    document.getElementById('section4-score').textContent = firstStudentScore.sectionScores[3];
+                }
             } else {
                 document.getElementById('average-score').textContent = '0.0';
                 document.getElementById('highest-score').textContent = '0';
@@ -930,6 +1188,8 @@
             
             if (type === 'error') {
                 notification.classList.add('error');
+            } else if (type === 'warning') {
+                notification.classList.add('warning');
             }
             
             notification.classList.add('show');
